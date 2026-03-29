@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Optional, List
 from app.database import get_db
 from app.models.session import Session as SessionModel
+from app.services.vibe_score import calculate_vibe_score, classify_engagement
 
 router = APIRouter()
 
@@ -99,6 +100,30 @@ def update_session(
     if session.end_time and session.start_time:
         duration = session.end_time - session.start_time
         session.duration_minutes = duration.total_seconds() / 60
+
+    db.commit()
+    db.refresh(session)
+    return session
+
+
+@router.post("/session/calculate-vibe/{session_id}", response_model=SessionResponse)
+def calculate_session_vibe(session_id: int, db: Session = Depends(get_db)):
+    session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    if not session.end_time:
+        raise HTTPException(status_code=400, detail="Session must be ended first")
+
+    vibe_score = calculate_vibe_score(
+        session.duration_minutes, session.prompt_count, session.break_time_minutes
+    )
+    classification = classify_engagement(
+        vibe_score, session.prompt_count, session.duration_minutes
+    )
+
+    session.vibe_score = vibe_score
+    session.classification = classification
 
     db.commit()
     db.refresh(session)
