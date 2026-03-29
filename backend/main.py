@@ -16,6 +16,7 @@ from app.api import (
     notifications,
     admin,
     metrics,
+    api_keys,
 )
 from app.database import engine, Base
 from app.websocket import manager
@@ -53,6 +54,7 @@ app.include_router(teams.router, prefix="/api", tags=["teams"])
 app.include_router(notifications.router, prefix="/api", tags=["notifications"])
 app.include_router(admin.router, prefix="/api", tags=["admin"])
 app.include_router(metrics.router, prefix="/api", tags=["metrics"])
+app.include_router(api_keys.router, prefix="/api", tags=["api-keys"])
 
 
 @app.websocket("/ws/{user_id}")
