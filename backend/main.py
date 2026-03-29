@@ -13,6 +13,7 @@ from app.api import (
     ml,
     webhooks,
     teams,
+    notifications,
 )
 from app.database import engine, Base
 from app.websocket import manager
@@ -47,6 +48,7 @@ app.include_router(auth.router, prefix="/api", tags=["auth"])
 app.include_router(ml.router, prefix="/api", tags=["ml"])
 app.include_router(webhooks.router, prefix="/api", tags=["webhooks"])
 app.include_router(teams.router, prefix="/api", tags=["teams"])
+app.include_router(notifications.router, prefix="/api", tags=["notifications"])
 
 
 @app.websocket("/ws/{user_id}")
