@@ -18,6 +18,7 @@ from app.api import (
     metrics,
     api_keys,
     batch,
+    activity,
 )
 from app.database import engine, Base
 from app.websocket import manager
@@ -57,6 +58,7 @@ app.include_router(admin.router, prefix="/api", tags=["admin"])
 app.include_router(metrics.router, prefix="/api", tags=["metrics"])
 app.include_router(api_keys.router, prefix="/api", tags=["api-keys"])
 app.include_router(batch.router, prefix="/api", tags=["batch"])
+app.include_router(activity.router, prefix="/api", tags=["activity"])
 
 
 @app.websocket("/ws/{user_id}")
