@@ -1,5 +1,6 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import SessionList from '../components/SessionList'
+import AnalyticsSummary from '../components/AnalyticsSummary'
 
 export default function Dashboard({ stats, dailyStats, sessions }) {
   const chartData = dailyStats.map(d => ({
@@ -15,7 +16,7 @@ export default function Dashboard({ stats, dailyStats, sessions }) {
   ]
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
       <div className="bg-white rounded-xl shadow-sm border p-6">
         <h2 className="text-lg font-semibold text-slate-800 mb-4">Daily Activity</h2>
         <ResponsiveContainer width="100%" height={250}>
@@ -64,6 +65,10 @@ export default function Dashboard({ stats, dailyStats, sessions }) {
       <div className="bg-white rounded-xl shadow-sm border p-6">
         <h2 className="text-lg font-semibold text-slate-800 mb-4">Recent Sessions</h2>
         <SessionList sessions={sessions.slice(0, 5)} />
+      </div>
+
+      <div className="lg:col-span-2">
+        <AnalyticsSummary />
       </div>
     </div>
   )
