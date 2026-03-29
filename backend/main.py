@@ -20,6 +20,7 @@ from app.api import (
     batch,
     activity,
     sentiment,
+    recommendations,
 )
 from app.services import sitemap
 from app.database import engine, Base
@@ -63,6 +64,7 @@ app.include_router(batch.router, prefix="/api", tags=["batch"])
 app.include_router(activity.router, prefix="/api", tags=["activity"])
 app.include_router(sitemap.router)
 app.include_router(sentiment.router, prefix="/api", tags=["sentiment"])
+app.include_router(recommendations.router, prefix="/api", tags=["recommendations"])
 
 
 @app.websocket("/ws/{user_id}")
