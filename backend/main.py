@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import sessions, events, stats, users
+from app.api import sessions, events, stats, users, analytics
 from app.database import engine, Base
 
 Base.metadata.create_all(bind=engine)
@@ -19,6 +19,7 @@ app.include_router(sessions.router, prefix="/api", tags=["sessions"])
 app.include_router(events.router, prefix="/api", tags=["events"])
 app.include_router(stats.router, prefix="/api", tags=["stats"])
 app.include_router(users.router, prefix="/api", tags=["users"])
+app.include_router(analytics.router, prefix="/api", tags=["analytics"])
 
 
 @app.get("/")
