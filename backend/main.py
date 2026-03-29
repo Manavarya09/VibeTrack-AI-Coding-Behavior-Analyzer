@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
-from app.api import sessions, events, stats, users, analytics
+from app.api import sessions, events, stats, users, analytics, reports
 from app.database import engine, Base
 import logging
 
@@ -30,6 +30,7 @@ app.include_router(events.router, prefix="/api", tags=["events"])
 app.include_router(stats.router, prefix="/api", tags=["stats"])
 app.include_router(users.router, prefix="/api", tags=["users"])
 app.include_router(analytics.router, prefix="/api", tags=["analytics"])
+app.include_router(reports.router, prefix="/api", tags=["reports"])
 
 
 @app.exception_handler(RequestValidationError)
