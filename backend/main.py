@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
-from app.api import sessions, events, stats, users, analytics, reports, auth
+from app.api import sessions, events, stats, users, analytics, reports, auth, ml
 from app.database import engine, Base
 from app.websocket import manager
 import logging
@@ -33,6 +33,7 @@ app.include_router(users.router, prefix="/api", tags=["users"])
 app.include_router(analytics.router, prefix="/api", tags=["analytics"])
 app.include_router(reports.router, prefix="/api", tags=["reports"])
 app.include_router(auth.router, prefix="/api", tags=["auth"])
+app.include_router(ml.router, prefix="/api", tags=["ml"])
 
 
 @app.websocket("/ws/{user_id}")
