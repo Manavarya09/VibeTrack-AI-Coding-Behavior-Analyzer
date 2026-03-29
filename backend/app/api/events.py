@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Optional, List
 from app.database import get_db
 from app.models.event import Event as EventModel
+from app.models.session import Session as SessionModel
 
 router = APIRouter()
 
@@ -44,6 +45,16 @@ def create_event(event_data: EventCreate, db: Session = Depends(get_db)):
         duration_seconds=event_data.duration_seconds,
     )
     db.add(event)
+
+    if event_data.event_type == "prompt":
+        session = (
+            db.query(SessionModel)
+            .filter(SessionModel.id == event_data.session_id)
+            .first()
+        )
+        if session:
+            session.prompt_count += 1
+
     db.commit()
     db.refresh(event)
     return event
