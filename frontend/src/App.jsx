@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import Dashboard from './pages/Dashboard'
-import SessionList from './components/SessionList'
-import { Activity, Clock, Zap, Coffee } from 'lucide-react'
+import SessionTimer from './components/SessionTimer'
+import { Activity, Clock, Zap, Coffee, Download } from 'lucide-react'
 
 function App() {
   const [stats, setStats] = useState(null)
   const [sessions, setSessions] = useState([])
   const [dailyStats, setDailyStats] = useState([])
+  const [currentSession, setCurrentSession] = useState(null)
   const [loading, setLoading] = useState(true)
 
   const fetchData = async () => {
@@ -14,7 +15,7 @@ function App() {
       const [statsRes, sessionsRes, dailyRes] = await Promise.all([
         fetch('/api/stats'),
         fetch('/api/sessions'),
-        fetch('/api/stats/days?days=7')
+        fetch('/api/stats/daily?days=7')
       ])
       const statsData = await statsRes.json()
       const sessionsData = await sessionsRes.json()
@@ -23,10 +24,54 @@ function App() {
       setStats(statsData)
       setSessions(sessionsData)
       setDailyStats(dailyData)
+      
+      const active = sessionsData.find(s => s.is_active)
+      setCurrentSession(active || null)
     } catch (error) {
       console.error('Failed to fetch data:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleStartSession = async () => {
+    try {
+      const res = await fetch('/api/session/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: 1, source: 'web' })
+      })
+      const session = await res.json()
+      setCurrentSession(session)
+      fetchData()
+    } catch (error) {
+      console.error('Failed to start session:', error)
+    }
+  }
+
+  const handleEndSession = async () => {
+    if (!currentSession) return
+    try {
+      await fetch(`/api/session/end/${currentSession.id}`, { method: 'POST' })
+      setCurrentSession(null)
+      fetchData()
+    } catch (error) {
+      console.error('Failed to end session:', error)
+    }
+  }
+
+  const handleExportCSV = async () => {
+    try {
+      const res = await fetch('/api/analytics/export?user_id=1')
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'vibetrack_sessions.csv'
+      a.click()
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Failed to export CSV:', error)
     }
   }
 
@@ -52,7 +97,16 @@ function App() {
             <Zap className="w-8 h-8 text-indigo-600" />
             <h1 className="text-2xl font-bold text-slate-800">VibeTrack</h1>
           </div>
-          <span className="text-sm text-slate-500">AI Coding Behavior Analyzer</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportCSV}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg"
+            >
+              <Download className="w-4 h-4" />
+              Export CSV
+            </button>
+            <span className="text-sm text-slate-500">AI Coding Behavior Analyzer</span>
+          </div>
         </div>
       </header>
 
@@ -84,7 +138,18 @@ function App() {
           />
         </div>
 
-        <Dashboard stats={stats} dailyStats={dailyStats} sessions={sessions} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          <div className="lg:col-span-2">
+            <Dashboard stats={stats} dailyStats={dailyStats} sessions={sessions} />
+          </div>
+          <div>
+            <SessionTimer
+              currentSession={currentSession}
+              onStart={handleStartSession}
+              onEnd={handleEndSession}
+            />
+          </div>
+        </div>
       </main>
     </div>
   )
