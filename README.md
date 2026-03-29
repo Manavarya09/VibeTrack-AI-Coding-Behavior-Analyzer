@@ -6,49 +6,47 @@
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat" alt="License">
 </p>
 
-# VibeTrack – AI Coding Behavior Analyzer
+# VibeTrack - AI Coding Behavior Analyzer
 
-> A comprehensive full-stack system that tracks AI-assisted coding behavior, detects "vibe coding loops" (prolonged high-engagement sessions), and provides actionable insights through ML-powered pattern detection.
+A comprehensive full-stack system that tracks AI-assisted coding behavior, detects "vibe coding loops" (prolonged high-engagement sessions), and provides actionable insights through ML-powered pattern detection.
 
-![VibeTrack Dashboard](https://via.placeholder.com/800x400?text=VibeTrack+Dashboard)
+## Table of Contents
 
-## 📌 Table of Contents
-
-- [Features](#-features)
-- [Architecture](#-architecture)
-- [Tech Stack](#-tech-stack)
-- [Quick Start](#-quick-start)
-- [API Documentation](#-api-documentation)
-- [Configuration](#-configuration)
-- [Deployment](#-deployment)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [API Documentation](#api-documentation)
+- [Configuration](#configuration)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## 🚀 Features
+## Features
 
 ### Core Features
 - **Session Tracking** - Track coding sessions with start/end times, duration, and source
 - **Event Logging** - Log AI tool interactions (Claude, Copilot, ChatGPT, Cursor, etc.)
 - **Vibe Score Engine** - Calculate engagement scores using the formula:
   ```
-  Score = (session_duration_minutes × prompt_count) / (break_time_minutes + 1)
+  Score = (session_duration_minutes x prompt_count) / (break_time_minutes + 1)
   ```
 - **Session Classification** - Categorize sessions as Normal, Deep Flow, or High Dependency
 - **Real-time Dashboard** - Visual analytics with charts and statistics
 
 ### Advanced Features
-- **🔐 JWT Authentication** - Secure login/register system with bcrypt password hashing
-- **🔌 WebSocket Support** - Real-time session updates and live monitoring
-- **🤖 ML Pattern Detection** - AI-powered productivity insights
-- **🎯 Session Prediction** - Predict session outcome based on parameters
-- **🪝 Webhooks** - External integrations (Slack, Discord, custom endpoints)
-- **👥 Team Collaboration** - Create teams, share sessions with teammates
-- **📊 Multi-format Export** - JSON, CSV, Markdown, PDF reports
-- **🔔 Notifications** - In-app alerts for session events
-- **📈 Activity Heatmap** - GitHub-style contribution calendar
-- **🎯 Goals Tracking** - Set and track productivity goals
+- **JWT Authentication** - Secure login/register system with bcrypt password hashing
+- **WebSocket Support** - Real-time session updates and live monitoring
+- **ML Pattern Detection** - AI-powered productivity insights
+- **Session Prediction** - Predict session outcome based on parameters
+- **Webhooks** - External integrations (Slack, Discord, custom endpoints)
+- **Team Collaboration** - Create teams, share sessions with teammates
+- **Multi-format Export** - JSON, CSV, Markdown, PDF reports
+- **Notifications** - In-app alerts for session events
+- **Activity Heatmap** - GitHub-style contribution calendar
+- **Goals Tracking** - Set and track productivity goals
 
 ### Tracking Options
 - **Chrome Extension** - Track browser-based AI tool usage
@@ -56,42 +54,42 @@
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        VibeTrack Architecture                    │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐   │
-│  │   Chrome     │     │   Desktop    │     │    Web       │   │
-│  │  Extension   │     │   Tracker    │     │   Dashboard  │   │
-│  └──────┬───────┘     └──────┬───────┘     └──────┬───────┘   │
-│         │                    │                    │            │
-│         └────────────────────┼────────────────────┘            │
-│                              │                                  │
-│                      ┌───────▼───────┐                        │
-│                      │  FastAPI API  │                        │
-│                      └───────┬───────┘                        │
-│                              │                                  │
-│         ┌────────────────────┼────────────────────┐           │
-│         │                    │                    │           │
-│  ┌──────▼──────┐    ┌──────▼──────┐    ┌──────▼──────┐   │
-│  │   Session   │    │   Events     │    │    Stats     │   │
-│  │   Manager   │    │   Manager    │    │   Aggregator │   │
-│  └─────────────┘    └──────────────┘    └─────────────┘   │
-│                              │                                  │
-│                      ┌───────▼───────┐                        │
-│                      │    SQLite     │                        │
-│                      │   Database    │                        │
-│                      └───────────────┘                        │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
++-------------------------------------------------------------+
+|                        VibeTrack Architecture                 |
++-------------------------------------------------------------+
+|                                                                  |
+|  +--------------+     +--------------+     +--------------+   |
+|  |   Chrome     |     |   Desktop    |     |    Web       |   |
+|  |  Extension   |     |   Tracker    |     |   Dashboard  |   |
+|  +------+-------+     +------+-------+     +------+-------+   |
+|         |                    |                    |            |
+|         +--------------------+--------------------+            |
+|                              |                                  |
+|                      +-------+-------+                        |
+|                      |  FastAPI API  |                        |
+|                      +-------+-------+                        |
+|                              |                                  |
+|         +--------------------+--------------------+           |
+|         |                    |                    |           |
+|  +------+------+    +------+------+    +------+------+   |
+|  |   Session   |    |   Events     |    |    Stats     |   |
+|  |   Manager   |    |   Manager    |    |   Aggregator |   |
+|  +-------------+    +--------------+    +-------------+   |
+|                              |                                  |
+|                      +-------+-------+                        |
+|                      |    SQLite     |                        |
+|                      |   Database    |                        |
+|                      +---------------+                        |
+|                                                                  |
++-------------------------------------------------------------+
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
@@ -105,7 +103,7 @@
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -164,7 +162,7 @@ cargo run
 
 ---
 
-## 📚 API Documentation
+## API Documentation
 
 ### Authentication
 
@@ -193,7 +191,7 @@ cargo run
 | GET | `/api/events` | List events |
 | GET | `/api/event/{id}` | Get event details |
 
-### Statistics & Analytics
+### Statistics and Analytics
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -202,7 +200,7 @@ cargo run
 | GET | `/api/analytics/summary` | Get analytics summary |
 | GET | `/api/analytics/export` | Export data (CSV/JSON/MD) |
 
-### ML & Insights
+### ML and Insights
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -257,7 +255,7 @@ curl -X POST http://localhost:8000/api/event \
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -285,7 +283,7 @@ alembic upgrade head
 
 ---
 
-## 🐳 Deployment
+## Deployment
 
 ### Using Docker
 
@@ -310,7 +308,7 @@ npm run preview
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 VibeTrack/
@@ -377,12 +375,12 @@ VibeTrack/
 
 ---
 
-## 🎯 Vibe Score Formula
+## Vibe Score Formula
 
 The Vibe Score quantifies your engagement level during coding sessions:
 
 ```
-Vibe Score = (Duration in Minutes × Prompt Count) / (Break Time in Minutes + 1)
+Vibe Score = (Duration in Minutes x Prompt Count) / (Break Time in Minutes + 1)
 ```
 
 ### Classification Thresholds
@@ -391,11 +389,11 @@ Vibe Score = (Duration in Minutes × Prompt Count) / (Break Time in Minutes + 1)
 |----------------|-------------|-------------|
 | **Normal** | < 100 | Standard coding session |
 | **Deep Flow** | 100 - 499 | Highly focused, productive session |
-| **High Dependency** | ≥ 500 | Heavy reliance on AI assistance |
+| **High Dependency** | >= 500 | Heavy reliance on AI assistance |
 
 ---
 
-## 🔧 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -405,20 +403,12 @@ Vibe Score = (Duration in Minutes × Prompt Count) / (Break Time in Minutes + 1)
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgments
-
-- Inspired by the concept of "vibe coding"
-- Built with FastAPI, React, and Rust
-- Thanks to all contributors!
-
----
-
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/Manavarya09">Manav Arya</a>
+  Made by <a href="https://github.com/Manavarya09">Manav Arya</a>
 </p>
