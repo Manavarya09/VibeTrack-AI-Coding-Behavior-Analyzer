@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      width: 300px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+    }
+    h1 {
+      font-size: 18px;
+      margin: 0 0 16px;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .status.active {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .status.inactive {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .start-btn {
+      background: #6366f1;
+      color: white;
+    }
+    .start-btn:hover {
+      background: #4f46e5;
+    }
+    .stop-btn {
+      background: #ef4444;
+      color: white;
+    }
+    .stop-btn:hover {
+      background: #dc2626;
+    }
+    .stats {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 13px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚡ VibeTrack</h1>
+  <div id="status" class="status inactive">
+    No active session
+  </div>
+  <button id="startBtn" class="start-btn">Start Session</button>
+  <button id="stopBtn" class="stop-btn" style="display: none;">End Session</button>
+  <div class="stats">
+    Events logged: <span id="eventCount">0</span>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
