@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
-from app.api import sessions, events, stats, users, analytics, reports
+from app.api import sessions, events, stats, users, analytics, reports, auth
 from app.database import engine, Base
+from app.websocket import manager
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -31,6 +32,23 @@ app.include_router(stats.router, prefix="/api", tags=["stats"])
 app.include_router(users.router, prefix="/api", tags=["users"])
 app.include_router(analytics.router, prefix="/api", tags=["analytics"])
 app.include_router(reports.router, prefix="/api", tags=["reports"])
+app.include_router(auth.router, prefix="/api", tags=["auth"])
+
+
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: int):
+    await manager.connect(websocket, user_id)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            message = json.loads(data)
+            if message.get("type") == "ping":
+                await websocket.send_json({"type": "pong"})
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, user_id)
+
+
+import json
 
 
 @app.exception_handler(RequestValidationError)
