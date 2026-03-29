@@ -20,6 +20,7 @@ from app.api import (
     batch,
     activity,
 )
+from app.services import sitemap
 from app.database import engine, Base
 from app.websocket import manager
 import logging
@@ -59,6 +60,7 @@ app.include_router(metrics.router, prefix="/api", tags=["metrics"])
 app.include_router(api_keys.router, prefix="/api", tags=["api-keys"])
 app.include_router(batch.router, prefix="/api", tags=["batch"])
 app.include_router(activity.router, prefix="/api", tags=["activity"])
+app.include_router(sitemap.router)
 
 
 @app.websocket("/ws/{user_id}")
