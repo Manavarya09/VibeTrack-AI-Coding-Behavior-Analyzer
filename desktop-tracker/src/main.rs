@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use tauri::State;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ActivityEvent {
@@ -14,45 +16,56 @@ pub struct ActivityEvent {
     pub is_idle: bool,
 }
 
-#[derive(Default)]
 pub struct TrackerState {
-    pub current_session: Mutex<Option<ActivityEvent>>,
+    pub running: Mutex<bool>,
     pub last_activity: Mutex<Instant>,
     pub event_count: Mutex<u32>,
-    pub is_tracking: Mutex<bool>,
+}
+
+impl Default for TrackerState {
+    fn default() -> Self {
+        Self {
+            running: Mutex::new(false),
+            last_activity: Mutex::new(Instant::now()),
+            event_count: Mutex::new(0),
+        }
+    }
 }
 
 const IDLE_THRESHOLD_SECS: u64 = 300;
 
 #[tauri::command]
 fn start_tracking(state: State<TrackerState>) -> Result<String, String> {
-    let mut is_tracking = state.is_tracking.lock().unwrap();
-    *is_tracking = true;
+    let mut is_running = state.running.lock().map_err(|e| e.to_string())?;
+    *is_running = true;
     
-    let mut last_activity = state.last_activity.lock().unwrap();
+    let mut last_activity = state.last_activity.lock().map_err(|e| e.to_string())?;
     *last_activity = Instant::now();
     
+    log::info!("Tracking started");
     Ok("Tracking started".to_string())
 }
 
 #[tauri::command]
 fn stop_tracking(state: State<TrackerState>) -> Result<String, String> {
-    let mut is_tracking = state.is_tracking.lock().unwrap();
-    *is_tracking = false;
+    let mut is_running = state.running.lock().map_err(|e| e.to_string())?;
+    *is_running = false;
+    
+    log::info!("Tracking stopped");
     Ok("Tracking stopped".to_string())
 }
 
 #[tauri::command]
 fn get_tracking_status(state: State<TrackerState>) -> Result<serde_json::Value, String> {
-    let is_tracking = *state.is_tracking.lock().unwrap();
-    let event_count = *state.event_count.lock().unwrap();
-    let last_activity = *state.last_activity.lock().unwrap();
+    let is_running = *state.running.lock().map_err(|e| e.to_string())?;
+    let event_count = *state.event_count.lock().map_err(|e| e.to_string())?;
+    let last_activity = *state.last_activity.lock().map_err(|e| e.to_string())?;
     
     let idle_seconds = last_activity.elapsed().as_secs();
     let is_idle = idle_seconds > IDLE_THRESHOLD_SECS;
     
     Ok(serde_json::json!({
-        "is_tracking": is_tracking,
+        "is_running": is_running,
         "event_count": event_count,
         "is_idle": is_idle,
         "idle_seconds": idle_seconds
@@ -66,18 +79,18 @@ async fn send_activity_event(
     window_title: String,
     duration_secs: f64,
 ) -> Result<(), String> {
-    let is_tracking = *state.is_tracking.lock().unwrap();
-    if !is_tracking {
+    let is_running = *state.running.lock().map_err(|e| e.to_string())?;
+    if !is_running {
         return Ok(());
     }
     
-    let last_activity = *state.last_activity.lock().unwrap();
+    let last_activity = *state.last_activity.lock().map_err(|e| e.to_string())?;
     let idle_seconds = last_activity.elapsed().as_secs();
     let is_idle = idle_seconds > IDLE_THRESHOLD_SECS;
     
     let event = ActivityEvent {
         timestamp: chrono::Utc::now().to_rfc3339(),
-        active_app: app_name,
+        active_app: app_name.clone(),
         window_title,
         duration: duration_secs,
         is_idle,
@@ -97,11 +110,13 @@ async fn send_activity_event(
         .send()
         .await;
     
-    let mut count = state.event_count.lock().unwrap();
+    let mut count = state.event_count.lock().map_err(|e| e.to_string())?;
     *count += 1;
     
-    let mut last = state.last_activity.lock().unwrap();
+    let mut last = state.last_activity.lock().map_err(|e| e.to_string())?;
     *last = Instant::now();
+    
+    log::info!("Activity event: {} - {}", app_name, if is_idle { "idle" } else { "active" });
     
     Ok(())
 }
