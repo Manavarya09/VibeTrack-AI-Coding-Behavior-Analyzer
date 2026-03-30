@@ -2,8 +2,8 @@
   "build": {
     "beforeBuildCommand": "cargo build --release",
     "beforeDevCommand": "cargo run",
-    "devPath": "../src",
-    "distDir": "../src"
+    "devPath": ".",
+    "distDir": "."
   },
   "package": {
     "productName": "VibeTrack Desktop",
@@ -15,34 +15,35 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "notification": {
+        "all": true
+      },
+      "window": {
+        "all": true
       }
     },
     "bundle": {
       "active": true,
       "category": "DeveloperTool",
-      "copyright": "",
+      "copyright": "2026 VibeTrack",
       "deb": {
-        "depends": []
+        "depends": ["libwebkit2gtk-4.1-0", "libgtk-3-0"]
       },
       "externalBin": [],
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
+      "icon": [],
       "identifier": "com.vibetrack.desktop",
-      "longDescription": "",
+      "longDescription": "AI Coding Behavior Analyzer - Track your productivity and optimize your coding workflow",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
         "frameworks": [],
         "providerShortName": null,
-        "signingIdentity": null
+        "signingIdentity": null,
+        "minimumSystemVersion": "10.15"
       },
       "resources": [],
-      "shortDescription": "",
+      "shortDescription": "AI Coding Behavior Analyzer",
       "targets": "all",
       "windows": {
         "certificateThumbprint": null,
@@ -51,7 +52,7 @@
       }
     },
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
     },
     "updater": {
       "active": false
@@ -59,10 +60,16 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 700,
+        "width": 1000,
+        "minHeight": 500,
+        "minWidth": 700,
         "resizable": true,
-        "title": "VibeTrack Desktop Tracker",
-        "width": 800
+        "title": "VibeTrack - Desktop Tracker",
+        "center": true,
+        "decorations": true,
+        "transparent": false,
+        "visible": true
       }
     ]
   }
