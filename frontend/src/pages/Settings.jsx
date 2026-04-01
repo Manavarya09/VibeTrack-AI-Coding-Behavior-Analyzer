@@ -1,178 +1,99 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import Navbar from '../components/Navbar'
-import { logout } from '../utils/api'
 
 export default function Settings({ user }) {
-  const [settings, setSettings] = useState(() => {
-    const stored = localStorage.getItem('vibetrack_settings')
-    return stored ? JSON.parse(stored) : {
-      username: user?.username || '',
-      email: user?.email || '',
-      idleThreshold: 5,
-      autoEndSession: 30,
-      notifications: true,
-      desktopTracking: false,
-    }
+  const [cfg, setCfg] = useState(() => {
+    const s = localStorage.getItem('vt_settings')
+    return s ? JSON.parse(s) : { idle: 5, autoEnd: 30, notifications: true, desktop: false }
   })
   const [saved, setSaved] = useState(false)
 
-  useEffect(() => {
-    if (user) {
-      setSettings(s => ({ ...s, username: user.username, email: user.email }))
-    }
-  }, [user])
-
-  const handleSave = () => {
-    localStorage.setItem('vibetrack_settings', JSON.stringify(settings))
+  const save = () => {
+    localStorage.setItem('vt_settings', JSON.stringify(cfg))
     setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    setTimeout(() => setSaved(false), 1500)
   }
 
-  const Toggle = ({ value, onChange }) => (
-    <div
-      className={`toggle-track ${value ? 'active' : ''}`}
-      onClick={() => onChange(!value)}
+  const Toggle = ({ on, onChange }) => (
+    <button onClick={() => onChange(!on)}
+      className="w-10 h-[22px] rounded-full relative transition-colors"
+      style={{ background: on ? 'var(--accent)' : 'var(--bg-3)', border: `1px solid ${on ? 'var(--accent)' : 'var(--border)'}` }}
     >
-      <div className="toggle-knob" />
-    </div>
+      <div className="w-4 h-4 rounded-full bg-white absolute top-[2px] transition-transform"
+        style={{ left: on ? '21px' : '2px' }}
+      />
+    </button>
   )
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--surface-1)' }}>
-      <Navbar user={user} />
+    <div style={{ background: 'var(--bg)' }} className="min-h-screen">
+      <Navbar />
+      <div className="max-w-[600px] mx-auto px-5 py-6">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold">Settings</h1>
+        </div>
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <h1 className="text-2xl font-bold text-stone-800 tracking-tight">Settings</h1>
-          <p className="text-sm text-stone-400 mt-0.5">Configure your tracking preferences</p>
-        </motion.div>
-
-        <div className="space-y-4">
-          {/* Profile */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="card p-5"
-          >
-            <h3 className="text-sm font-semibold text-stone-600 mb-4">Profile</h3>
+        <div className="space-y-3">
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="surface p-5">
+            <div className="label mb-4">Profile</div>
             <div className="space-y-3">
               <div>
-                <label className="block text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1">Username</label>
-                <input
-                  type="text"
-                  value={settings.username}
-                  onChange={e => setSettings({ ...settings, username: e.target.value })}
-                  className="input-field"
-                />
+                <label className="text-[11px] text-zinc-500 mb-1 block">Username</label>
+                <input type="text" value={user?.username || ''} readOnly className="field opacity-60" />
               </div>
               <div>
-                <label className="block text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1">Email</label>
-                <input
-                  type="email"
-                  value={settings.email}
-                  onChange={e => setSettings({ ...settings, email: e.target.value })}
-                  className="input-field"
-                />
+                <label className="text-[11px] text-zinc-500 mb-1 block">User ID</label>
+                <input type="text" value={user?.id || ''} readOnly className="field opacity-60" />
               </div>
             </div>
           </motion.div>
 
-          {/* Session config */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="card p-5"
-          >
-            <h3 className="text-sm font-semibold text-stone-600 mb-4">Session tracking</h3>
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="surface p-5">
+            <div className="label mb-4">Tracking</div>
             <div className="space-y-5">
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-semibold text-stone-500">Idle threshold</label>
-                  <div className="inset px-2 py-0.5">
-                    <span className="text-xs font-bold dial text-stone-700">{settings.idleThreshold} min</span>
-                  </div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm text-zinc-400">Idle threshold</span>
+                  <span className="text-sm mono font-semibold">{cfg.idle}m</span>
                 </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="30"
-                  value={settings.idleThreshold}
-                  onChange={e => setSettings({ ...settings, idleThreshold: +e.target.value })}
-                  className="w-full accent-amber-600"
-                />
+                <input type="range" min="1" max="30" value={cfg.idle}
+                  onChange={e => setCfg({ ...cfg, idle: +e.target.value })} className="w-full" />
               </div>
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-semibold text-stone-500">Auto-end inactive session</label>
-                  <div className="inset px-2 py-0.5">
-                    <span className="text-xs font-bold dial text-stone-700">{settings.autoEndSession} min</span>
-                  </div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm text-zinc-400">Auto-end after inactive</span>
+                  <span className="text-sm mono font-semibold">{cfg.autoEnd}m</span>
                 </div>
-                <input
-                  type="range"
-                  min="5"
-                  max="120"
-                  value={settings.autoEndSession}
-                  onChange={e => setSettings({ ...settings, autoEndSession: +e.target.value })}
-                  className="w-full accent-amber-600"
-                />
+                <input type="range" min="5" max="120" value={cfg.autoEnd}
+                  onChange={e => setCfg({ ...cfg, autoEnd: +e.target.value })} className="w-full" />
               </div>
             </div>
           </motion.div>
 
-          {/* Toggles */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="card p-5"
-          >
-            <h3 className="text-sm font-semibold text-stone-600 mb-4">Preferences</h3>
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="surface p-5">
+            <div className="label mb-4">Preferences</div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-medium text-stone-700">Notifications</div>
-                  <div className="text-xs text-stone-400">Get alerts for long sessions</div>
+                  <div className="text-sm">Notifications</div>
+                  <div className="text-[11px] text-zinc-600">Alert on long sessions</div>
                 </div>
-                <Toggle value={settings.notifications} onChange={v => setSettings({ ...settings, notifications: v })} />
+                <Toggle on={cfg.notifications} onChange={v => setCfg({ ...cfg, notifications: v })} />
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-medium text-stone-700">Desktop tracking</div>
-                  <div className="text-xs text-stone-400">Auto-detect active window</div>
+                  <div className="text-sm">Desktop tracking</div>
+                  <div className="text-[11px] text-zinc-600">Auto-detect active window</div>
                 </div>
-                <Toggle value={settings.desktopTracking} onChange={v => setSettings({ ...settings, desktopTracking: v })} />
+                <Toggle on={cfg.desktop} onChange={v => setCfg({ ...cfg, desktop: v })} />
               </div>
             </div>
           </motion.div>
 
-          {/* Save */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <button onClick={handleSave} className="btn-primary w-full">
-              {saved ? 'Settings saved' : 'Save settings'}
-            </button>
-          </motion.div>
-
-          {/* Danger zone */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="card p-5 mt-6"
-            style={{ borderColor: '#fecaca' }}
-          >
-            <h3 className="text-sm font-semibold text-red-700 mb-3">Account</h3>
-            <button onClick={logout} className="btn-danger w-full">
-              Sign out
-            </button>
-          </motion.div>
+          <button onClick={save} className={`btn w-full ${saved ? 'btn-ghost' : 'btn-accent'}`}>
+            {saved ? 'Saved' : 'Save settings'}
+          </button>
         </div>
       </div>
     </div>
