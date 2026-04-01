@@ -143,19 +143,33 @@ class PatternDetector:
     def predict_session_outcome(self, session_data: Dict) -> Dict:
         duration = session_data.get("duration_minutes", 0)
         prompts = session_data.get("prompt_count", 0)
+        breaks = session_data.get("break_time_minutes", 0)
 
-        if duration > 180 and prompts > 50:
+        # Calculate actual vibe score using formula
+        predicted_score = round(
+            (duration * prompts) / (breaks + 1), 2
+        ) if duration > 0 else 0
+
+        if predicted_score >= 500 or (prompts > 50 and duration > 120):
             predicted_class = "High Dependency"
             confidence = 0.85
-        elif duration > 60 and prompts > 10:
+        elif predicted_score >= 100 or (prompts > 20 and duration > 60):
             predicted_class = "Deep Flow"
             confidence = 0.70
         else:
             predicted_class = "Normal"
             confidence = 0.60
 
+        # Scale confidence with data quality
+        confidence = min(0.5 + (duration / 360), 0.95)
+
         return {
             "predicted_classification": predicted_class,
-            "confidence": confidence,
-            "factors": {"duration": duration, "prompt_count": prompts},
+            "predicted_score": predicted_score,
+            "confidence": round(confidence, 2),
+            "factors": {
+                "duration": duration,
+                "prompt_count": prompts,
+                "break_minutes": breaks,
+            },
         }

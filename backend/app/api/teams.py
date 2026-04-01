@@ -13,6 +13,7 @@ router = APIRouter()
 class TeamCreate(BaseModel):
     name: str
     description: Optional[str] = None
+    owner_id: int = 1
 
 
 class TeamResponse(BaseModel):
@@ -31,22 +32,36 @@ class TeamMemberAdd(BaseModel):
     role: str = "member"
 
 
+def _team_to_response(team, member_count: int) -> dict:
+    return {
+        "id": team.id,
+        "name": team.name,
+        "description": team.description,
+        "created_at": team.created_at,
+        "member_count": member_count,
+    }
+
+
 @router.post("/teams", response_model=TeamResponse)
 def create_team(team_data: TeamCreate, db: Session = Depends(get_db)):
     existing = db.query(Team).filter(Team.name == team_data.name).first()
     if existing:
         raise HTTPException(status_code=400, detail="Team name already exists")
 
-    team = Team(name=team_data.name, description=team_data.description, owner_id=1)
+    team = Team(
+        name=team_data.name,
+        description=team_data.description,
+        owner_id=team_data.owner_id,
+    )
     db.add(team)
     db.commit()
     db.refresh(team)
 
-    member = TeamMember(team_id=team.id, user_id=1, role="owner")
+    member = TeamMember(team_id=team.id, user_id=team_data.owner_id, role="owner")
     db.add(member)
     db.commit()
 
-    return team
+    return _team_to_response(team, 1)
 
 
 @router.get("/teams", response_model=List[TeamResponse])
@@ -57,7 +72,7 @@ def get_teams(db: Session = Depends(get_db)):
         member_count = (
             db.query(TeamMember).filter(TeamMember.team_id == team.id).count()
         )
-        result.append({**team.__dict__, "member_count": member_count})
+        result.append(_team_to_response(team, member_count))
     return result
 
 
@@ -67,7 +82,7 @@ def get_team(team_id: int, db: Session = Depends(get_db)):
     if not team:
         raise HTTPException(status_code=404, detail="Team not found")
     member_count = db.query(TeamMember).filter(TeamMember.team_id == team_id).count()
-    return {**team.__dict__, "member_count": member_count}
+    return _team_to_response(team, member_count)
 
 
 @router.post("/teams/{team_id}/members")
@@ -103,12 +118,14 @@ def get_team_stats(team_id: int, db: Session = Depends(get_db)):
 
     sessions = db.query(SessionModel).filter(SessionModel.user_id.in_(member_ids)).all()
 
+    total_minutes = sum(s.duration_minutes for s in sessions)
+
     return {
         "team_id": team_id,
         "member_count": len(members),
         "total_sessions": len(sessions),
-        "total_minutes": sum(s.duration_minutes for s in sessions),
-        "avg_session_length": sum(s.duration_minutes for s in sessions) / len(sessions)
+        "total_minutes": round(total_minutes, 2),
+        "avg_session_length": round(total_minutes / len(sessions), 2)
         if sessions
         else 0,
     }

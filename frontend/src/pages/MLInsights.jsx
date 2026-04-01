@@ -17,10 +17,12 @@ export default function MLInsights({ user }) {
   useEffect(() => {
     Promise.all([
       fetchPatterns(user?.id).catch(() => null),
-      fetchRecommendations(user?.id).catch(() => []),
+      fetchRecommendations(user?.id).catch(() => null),
     ]).then(([p, r]) => {
       setPatterns(p)
-      setRecommendations(Array.isArray(r) ? r : [])
+      // API returns {user_id, recommendations: [...]}
+      const recs = r?.recommendations || (Array.isArray(r) ? r : [])
+      setRecommendations(recs)
       setLoading(false)
     })
   }, [user?.id])

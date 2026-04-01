@@ -17,17 +17,17 @@ export default class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-          <div className="max-w-md w-full bg-white border-4 border-black p-8 text-center">
-            <h1 className="text-3xl font-black mb-4">ERROR</h1>
-            <p className="text-gray-600 mb-6">
-              Something went wrong. Please refresh the page.
+        <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--surface-1)' }}>
+          <div className="card-raised p-8 max-w-md w-full text-center">
+            <h1 className="text-xl font-bold text-stone-800 mb-2">Something went wrong</h1>
+            <p className="text-sm text-stone-500 mb-6">
+              An unexpected error occurred. Please refresh the page.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-black text-white px-6 py-3 font-bold hover:bg-gray-800 transition-colors"
+              className="btn-primary"
             >
-              Refresh Page
+              Refresh page
             </button>
           </div>
         </div>

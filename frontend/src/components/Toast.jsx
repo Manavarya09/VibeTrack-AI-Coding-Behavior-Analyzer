@@ -1,22 +1,14 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react'
-
-const icons = {
-  success: CheckCircle,
-  error: XCircle,
-  warning: AlertCircle,
-  info: Info
-}
 
 const colors = {
-  success: 'bg-black',
-  error: 'bg-red-600',
-  warning: 'bg-red-600',
-  info: 'bg-black'
+  success: { bg: '#f0fdf4', border: '#bbf7d0', text: '#15803d' },
+  error: { bg: '#fef2f2', border: '#fecaca', text: '#b91c1c' },
+  warning: { bg: '#fffbeb', border: '#fde68a', text: '#b45309' },
+  info: { bg: '#f5f5f4', border: '#d6d3d1', text: '#44403c' },
 }
 
 export function Toast({ type = 'info', message, onClose, duration = 5000 }) {
-  const Icon = icons[type]
+  const c = colors[type] || colors.info
 
   useEffect(() => {
     if (duration > 0) {
@@ -26,11 +18,16 @@ export function Toast({ type = 'info', message, onClose, duration = 5000 }) {
   }, [duration, onClose])
 
   return (
-    <div className={`${colors[type]} text-white px-4 py-3 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3 min-w-[300px]`}>
-      <Icon className="w-5 h-5 flex-shrink-0" />
-      <p className="flex-1 font-bold">{message}</p>
-      <button onClick={onClose} className="hover:opacity-80">
-        <X className="w-4 h-4" />
+    <div
+      className="flex items-center gap-3 px-4 py-3 rounded-xl min-w-[280px] shadow-lg animate-in"
+      style={{ background: c.bg, border: `1px solid ${c.border}` }}
+    >
+      <p className="flex-1 text-sm font-medium" style={{ color: c.text }}>{message}</p>
+      <button
+        onClick={onClose}
+        className="text-stone-400 hover:text-stone-600 text-xs font-semibold"
+      >
+        dismiss
       </button>
     </div>
   )
@@ -71,6 +68,6 @@ export function useToast() {
     success: (msg) => addToast('success', msg),
     error: (msg) => addToast('error', msg),
     warning: (msg) => addToast('warning', msg),
-    info: (msg) => addToast('info', msg)
+    info: (msg) => addToast('info', msg),
   }
 }
