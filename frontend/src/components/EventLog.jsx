@@ -7,15 +7,14 @@ export default function EventLog({ sessionId }) {
 
   useEffect(() => {
     if (!sessionId) return
-    
+
     fetch(`/api/reports/session/${sessionId}/events`)
       .then(res => res.json())
       .then(data => {
         setEvents(data.events || [])
         setLoading(false)
       })
-      .catch(err => {
-        console.error('Failed to fetch events:', err)
+      .catch(() => {
         setLoading(false)
       })
   }, [sessionId])
@@ -29,52 +28,58 @@ export default function EventLog({ sessionId }) {
     }
   }
 
-  const getEventColor = (type) => {
+  const getEventAccent = (type) => {
     switch (type) {
-      case 'prompt': return 'text-blue-500 bg-blue-50'
-      case 'break': return 'text-orange-500 bg-orange-50'
-      case 'activity': return 'text-green-500 bg-green-50'
-      default: return 'text-slate-500 bg-slate-50'
+      case 'prompt': return 'bg-black'
+      case 'break': return 'bg-red-600'
+      case 'activity': return 'bg-black'
+      default: return 'bg-gray-500'
     }
   }
 
   if (loading) {
-    return <div className="animate-pulse h-48 bg-slate-200 rounded-xl"></div>
-  }
-
-  if (!events.length) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border p-6">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4">Session Events</h2>
-        <p className="text-slate-500 text-sm">No events recorded in this session.</p>
+      <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-14 bg-gray-100 border-2 border-black animate-pulse" />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-6">
-      <h2 className="text-lg font-semibold text-slate-800 mb-4">Session Events ({events.length})</h2>
-      <div className="space-y-3 max-h-64 overflow-y-auto">
-        {events.map((event, index) => {
-          const Icon = getEventIcon(event.event_type)
-          const colorClass = getEventColor(event.event_type)
-          
-          return (
-            <div key={index} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
-              <div className={`p-2 rounded-lg ${colorClass}`}>
-                <Icon className="w-4 h-4" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-slate-800 capitalize">{event.event_type}</p>
-                <p className="text-xs text-slate-500 truncate">{event.content || 'No content'}</p>
-                <p className="text-xs text-slate-400 mt-1">
+    <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+      <h2 className="text-xl font-black mb-6">SESSION EVENTS ({events.length})</h2>
+
+      {!events.length ? (
+        <div className="h-32 bg-gray-100 border-2 border-black flex items-center justify-center">
+          <p className="font-bold text-gray-400">NO EVENTS RECORDED</p>
+        </div>
+      ) : (
+        <div className="space-y-2 max-h-64 overflow-y-auto">
+          {events.map((event, index) => {
+            const Icon = getEventIcon(event.event_type)
+            const accent = getEventAccent(event.event_type)
+
+            return (
+              <div key={index} className="flex items-start gap-3 p-3 border-2 border-black hover:bg-gray-50 transition-colors">
+                <div className={`w-8 h-8 ${accent} flex items-center justify-center flex-shrink-0`}>
+                  <Icon className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-black text-sm uppercase">{event.event_type}</p>
+                  <p className="text-sm font-bold text-gray-500 truncate">{event.content || 'No content'}</p>
+                </div>
+                <span className="font-bold text-xs text-gray-400 flex-shrink-0">
                   {new Date(event.timestamp).toLocaleTimeString()}
-                </p>
+                </span>
               </div>
-            </div>
-          )
-        })}
-      </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

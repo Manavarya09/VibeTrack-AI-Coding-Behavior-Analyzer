@@ -10,27 +10,23 @@ export default function RealTimeMonitor() {
   useEffect(() => {
     const connectWebSocket = () => {
       wsRef.current = new WebSocket('ws://localhost:8000/ws/1')
-      
+
       wsRef.current.onopen = () => {
         setIsConnected(true)
-        console.log('WebSocket connected')
       }
-      
+
       wsRef.current.onmessage = (event) => {
         const data = JSON.parse(event.data)
         setLastEvent(data)
         setEventCount(prev => prev + 1)
       }
-      
+
       wsRef.current.onclose = () => {
         setIsConnected(false)
-        console.log('WebSocket disconnected')
         setTimeout(connectWebSocket, 3000)
       }
-      
-      wsRef.current.onerror = (error) => {
-        console.error('WebSocket error:', error)
-      }
+
+      wsRef.current.onerror = () => {}
     }
 
     connectWebSocket()
@@ -49,47 +45,49 @@ export default function RealTimeMonitor() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-          <Activity className="w-5 h-5" />
-          Real-Time Monitor
+    <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-black flex items-center gap-3">
+          <div className="w-10 h-10 bg-black flex items-center justify-center">
+            <Activity className="w-6 h-6 text-white" />
+          </div>
+          REAL-TIME MONITOR
         </h2>
-        <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${isConnected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+        <div className={`flex items-center gap-2 px-3 py-1 border-2 border-black font-black text-sm ${
+          isConnected ? 'bg-black text-white' : 'bg-red-600 text-white'
+        }`}>
           {isConnected ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
-          <span className="text-sm">{isConnected ? 'Connected' : 'Disconnected'}</span>
+          {isConnected ? 'CONNECTED' : 'DISCONNECTED'}
         </div>
       </div>
 
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 bg-slate-50 rounded-lg">
-            <p className="text-sm text-slate-500">Events Received</p>
-            <p className="text-2xl font-bold text-slate-800">{eventCount}</p>
-          </div>
-          <div className="p-4 bg-slate-50 rounded-lg">
-            <p className="text-sm text-slate-500">Connection Status</p>
-            <p className="text-2xl font-bold text-slate-800">{isConnected ? 'Active' : 'Inactive'}</p>
-          </div>
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="border-2 border-black p-4">
+          <p className="font-black text-sm text-gray-500">EVENTS</p>
+          <p className="text-3xl font-black">{eventCount}</p>
         </div>
-
-        {lastEvent && (
-          <div className="p-4 bg-indigo-50 rounded-lg">
-            <p className="text-sm text-indigo-600 font-medium">Last Event</p>
-            <pre className="text-xs text-indigo-800 mt-2 overflow-x-auto">
-              {JSON.stringify(lastEvent, null, 2)}
-            </pre>
-          </div>
-        )}
-
-        <button
-          onClick={sendPing}
-          disabled={!isConnected}
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-        >
-          Send Ping
-        </button>
+        <div className="border-2 border-black p-4">
+          <p className="font-black text-sm text-gray-500">STATUS</p>
+          <p className="text-3xl font-black">{isConnected ? 'LIVE' : 'OFF'}</p>
+        </div>
       </div>
+
+      {lastEvent && (
+        <div className="bg-gray-100 border-2 border-black p-4 mb-4">
+          <p className="font-black text-sm text-gray-500 mb-2">LAST EVENT</p>
+          <pre className="text-xs font-mono font-bold overflow-x-auto">
+            {JSON.stringify(lastEvent, null, 2)}
+          </pre>
+        </div>
+      )}
+
+      <button
+        onClick={sendPing}
+        disabled={!isConnected}
+        className="w-full bg-black text-white py-3 px-4 font-black border-4 border-black hover:bg-red-600 transition-colors disabled:opacity-50"
+      >
+        SEND PING
+      </button>
     </div>
   )
 }

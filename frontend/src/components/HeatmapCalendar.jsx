@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 export default function HeatmapCalendar({ sessions = [] }) {
   const [heatmapData, setHeatmapData] = useState({})
-  
+
   useEffect(() => {
     const data = {}
     sessions.forEach(session => {
@@ -16,17 +16,17 @@ export default function HeatmapCalendar({ sessions = [] }) {
   }, [sessions])
 
   const getColor = (minutes) => {
-    if (minutes === 0) return 'bg-slate-100'
-    if (minutes < 30) return 'bg-green-200'
-    if (minutes < 60) return 'bg-green-300'
-    if (minutes < 120) return 'bg-green-400'
-    return 'bg-green-500'
+    if (minutes === 0) return 'bg-gray-200'
+    if (minutes < 30) return 'bg-gray-400'
+    if (minutes < 60) return 'bg-gray-600'
+    if (minutes < 120) return 'bg-red-500'
+    return 'bg-red-600'
   }
 
   const generateCalendarDays = () => {
     const days = []
     const today = new Date()
-    
+
     for (let i = 364; i >= 0; i--) {
       const date = new Date(today)
       date.setDate(date.getDate() - i)
@@ -37,7 +37,7 @@ export default function HeatmapCalendar({ sessions = [] }) {
         display: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       })
     }
-    
+
     return days
   }
 
@@ -48,17 +48,17 @@ export default function HeatmapCalendar({ sessions = [] }) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-6">
-      <h2 className="text-lg font-semibold text-slate-800 mb-4">Activity Heatmap</h2>
-      
+    <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+      <h2 className="text-xl font-black mb-6">ACTIVITY HEATMAP</h2>
+
       <div className="overflow-x-auto">
-        <div className="flex gap-1">
+        <div className="flex gap-[3px]">
           {weeks.map((week, weekIdx) => (
-            <div key={weekIdx} className="flex flex-col gap-1">
+            <div key={weekIdx} className="flex flex-col gap-[3px]">
               {week.map((day, dayIdx) => (
                 <div
                   key={dayIdx}
-                  className={`w-3 h-3 rounded-sm ${getColor(day.minutes)}`}
+                  className={`w-3 h-3 ${getColor(day.minutes)} border border-black`}
                   title={`${day.display}: ${Math.round(day.minutes)} min`}
                 />
               ))}
@@ -67,14 +67,14 @@ export default function HeatmapCalendar({ sessions = [] }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mt-4 text-xs text-slate-500">
-        <span>Less</span>
-        <div className="w-3 h-3 bg-slate-100 rounded-sm" />
-        <div className="w-3 h-3 bg-green-200 rounded-sm" />
-        <div className="w-3 h-3 bg-green-300 rounded-sm" />
-        <div className="w-3 h-3 bg-green-400 rounded-sm" />
-        <div className="w-3 h-3 bg-green-500 rounded-sm" />
-        <span>More</span>
+      <div className="flex items-center gap-2 mt-4 font-bold text-xs text-gray-500">
+        <span>LESS</span>
+        <div className="w-3 h-3 bg-gray-200 border border-black" />
+        <div className="w-3 h-3 bg-gray-400 border border-black" />
+        <div className="w-3 h-3 bg-gray-600 border border-black" />
+        <div className="w-3 h-3 bg-red-500 border border-black" />
+        <div className="w-3 h-3 bg-red-600 border border-black" />
+        <span>MORE</span>
       </div>
     </div>
   )

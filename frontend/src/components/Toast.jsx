@@ -9,15 +9,15 @@ const icons = {
 }
 
 const colors = {
-  success: 'bg-green-500',
-  error: 'bg-red-500',
-  warning: 'bg-yellow-500',
-  info: 'bg-blue-500'
+  success: 'bg-black',
+  error: 'bg-red-600',
+  warning: 'bg-red-600',
+  info: 'bg-black'
 }
 
 export function Toast({ type = 'info', message, onClose, duration = 5000 }) {
   const Icon = icons[type]
-  
+
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(onClose, duration)
@@ -26,9 +26,9 @@ export function Toast({ type = 'info', message, onClose, duration = 5000 }) {
   }, [duration, onClose])
 
   return (
-    <div className={`${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px]`}>
+    <div className={`${colors[type]} text-white px-4 py-3 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3 min-w-[300px]`}>
       <Icon className="w-5 h-5 flex-shrink-0" />
-      <p className="flex-1 font-medium">{message}</p>
+      <p className="flex-1 font-bold">{message}</p>
       <button onClick={onClose} className="hover:opacity-80">
         <X className="w-4 h-4" />
       </button>

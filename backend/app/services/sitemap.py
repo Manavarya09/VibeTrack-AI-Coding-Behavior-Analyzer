@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from fastapi.responses import XMLResponse
+from fastapi.responses import Response
 
 router = APIRouter()
 
@@ -43,14 +43,14 @@ PAGES = [
 ]
 
 
-@router.get("/sitemap.xml", response_class=XMLResponse)
+@router.get("/sitemap.xml")
 def generate_sitemap():
     urls = ""
     for page in PAGES:
         urls += URL_TEMPLATE.format(**page)
 
     sitemap = SITEMAP_TEMPLATE.format(urls=urls)
-    return XMLResponse(content=sitemap, media_type="application/xml")
+    return Response(content=sitemap, media_type="application/xml")
 
 
 @router.get("/robots.txt")

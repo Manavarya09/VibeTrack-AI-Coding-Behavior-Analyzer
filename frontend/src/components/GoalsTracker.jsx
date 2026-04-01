@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Target, CheckCircle, Circle } from 'lucide-react'
+import { Target, Check } from 'lucide-react'
 
 export default function GoalsTracker() {
   const [goals, setGoals] = useState([
@@ -26,38 +26,39 @@ export default function GoalsTracker() {
   }, [])
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-6">
-      <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-        <Target className="w-5 h-5 text-indigo-500" />
-        Goals & Progress
+    <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+      <h2 className="text-xl font-black mb-6 flex items-center gap-3">
+        <div className="w-10 h-10 bg-red-600 flex items-center justify-center">
+          <Target className="w-6 h-6 text-white" />
+        </div>
+        GOALS & PROGRESS
       </h2>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {goals.map(goal => {
           const progress = Math.min((goal.current / goal.target) * 100, 100)
           const isComplete = goal.current >= goal.target
 
           return (
-            <div key={goal.id} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {isComplete ? (
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                  ) : (
-                    <Circle className="w-5 h-5 text-slate-300" />
-                  )}
-                  <span className={`text-sm ${isComplete ? 'text-slate-600 line-through' : 'text-slate-800'}`}>
+            <div key={goal.id}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <div className={`w-7 h-7 border-2 border-black flex items-center justify-center ${
+                    isComplete ? 'bg-black' : 'bg-white'
+                  }`}>
+                    {isComplete && <Check className="w-4 h-4 text-white" />}
+                  </div>
+                  <span className={`font-bold text-sm ${isComplete ? 'line-through text-gray-400' : ''}`}>
                     {goal.title}
                   </span>
                 </div>
-                <span className="text-sm text-slate-500">
-                  {goal.current} / {goal.target}
+                <span className="font-black text-sm">
+                  {Math.round(goal.current)}/{goal.target}
                 </span>
               </div>
-              
-              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-4 bg-gray-200 border-2 border-black">
                 <div
-                  className={`h-full rounded-full transition-all duration-500 ${isComplete ? 'bg-green-500' : 'bg-indigo-500'}`}
+                  className={`h-full transition-all duration-500 ${isComplete ? 'bg-black' : 'bg-red-600'}`}
                   style={{ width: `${progress}%` }}
                 />
               </div>

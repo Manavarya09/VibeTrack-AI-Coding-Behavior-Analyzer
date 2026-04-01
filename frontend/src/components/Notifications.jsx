@@ -1,20 +1,20 @@
-import { useState, useEffect } from 'react'
-import { Bell, X, CheckCircle, AlertCircle, Info } from 'lucide-react'
+import { useState } from 'react'
+import { X, CheckCircle, AlertCircle, Info } from 'lucide-react'
 
 const NOTIFICATION_TYPES = {
-  success: { icon: CheckCircle, bg: 'bg-green-50 border-green-200', text: 'text-green-800' },
-  error: { icon: AlertCircle, bg: 'bg-red-50 border-red-200', text: 'text-red-800' },
-  info: { icon: Info, bg: 'bg-blue-50 border-blue-200', text: 'text-blue-800' },
+  success: { icon: CheckCircle, bg: 'bg-black', border: 'border-black' },
+  error: { icon: AlertCircle, bg: 'bg-red-600', border: 'border-red-600' },
+  info: { icon: Info, bg: 'bg-black', border: 'border-black' },
 }
 
 export function Notification({ type = 'info', message, onClose }) {
-  const { icon: Icon, bg, text } = NOTIFICATION_TYPES[type]
-  
+  const { icon: Icon, bg } = NOTIFICATION_TYPES[type]
+
   return (
-    <div className={`flex items-center gap-3 p-4 rounded-lg border ${bg} animate-slide-in`}>
-      <Icon className={`w-5 h-5 ${text}`} />
-      <p className={`flex-1 text-sm ${text}`}>{message}</p>
-      <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+    <div className={`flex items-center gap-3 p-4 ${bg} text-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}>
+      <Icon className="w-5 h-5 flex-shrink-0" />
+      <p className="flex-1 font-bold text-sm">{message}</p>
+      <button onClick={onClose} className="hover:opacity-80">
         <X className="w-4 h-4" />
       </button>
     </div>

@@ -45,49 +45,50 @@ export default function SessionTimer({ currentSession, onStart, onEnd }) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-          <Clock className="w-5 h-5" />
-          Current Session
+    <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-black flex items-center gap-3">
+          <div className="w-10 h-10 bg-black flex items-center justify-center">
+            <Clock className="w-6 h-6 text-white" />
+          </div>
+          CURRENT SESSION
         </h2>
         {currentSession && (
-          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
-            Active
-          </span>
+          <div className="bg-red-600 text-white px-4 py-1 font-black text-sm flex items-center gap-2">
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+            ACTIVE
+          </div>
         )}
       </div>
-      
+
       <div className="text-center mb-6">
-        <div className="text-5xl font-bold text-slate-800 font-mono">
+        <div className="text-6xl font-black font-mono tracking-wider">
           {formatTime(elapsed)}
         </div>
-        <p className="text-sm text-slate-500 mt-2">
+        <p className="font-bold text-gray-500 mt-2 uppercase">
           {currentSession ? 'Session in progress' : 'No active session'}
         </p>
       </div>
 
-      <div className="flex gap-3">
-        {!currentSession ? (
-          <button
-            onClick={handleStart}
-            disabled={loading}
-            className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-          >
-            <Play className="w-5 h-5" />
-            Start Session
-          </button>
-        ) : (
-          <button
-            onClick={handleEnd}
-            disabled={loading}
-            className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50"
-          >
-            <Square className="w-5 h-5" />
-            End Session
-          </button>
-        )}
-      </div>
+      {!currentSession ? (
+        <button
+          onClick={handleStart}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-3 bg-black text-white py-4 px-6 font-black text-lg border-4 border-black hover:bg-red-600 transition-colors disabled:opacity-50"
+        >
+          <Play className="w-6 h-6" />
+          START SESSION
+        </button>
+      ) : (
+        <button
+          onClick={handleEnd}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-3 bg-red-600 text-white py-4 px-6 font-black text-lg border-4 border-black hover:bg-black transition-colors disabled:opacity-50"
+        >
+          <Square className="w-6 h-6" />
+          END SESSION
+        </button>
+      )}
     </div>
   )
 }

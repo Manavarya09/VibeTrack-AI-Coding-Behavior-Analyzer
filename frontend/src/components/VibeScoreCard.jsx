@@ -1,20 +1,20 @@
 import { Zap, TrendingUp, AlertTriangle } from 'lucide-react'
 
 export default function VibeScoreCard({ score, classification }) {
-  const getScoreColor = (score) => {
-    if (score >= 500) return 'text-red-600 bg-red-50'
-    if (score >= 100) return 'text-purple-600 bg-purple-50'
-    return 'text-slate-600 bg-slate-50'
+  const getScoreAccent = (score) => {
+    if (score >= 500) return 'bg-red-600'
+    if (score >= 100) return 'bg-purple-600'
+    return 'bg-gray-500'
   }
 
   const getClassificationBadge = (classification) => {
     switch (classification) {
       case 'Deep Flow':
-        return { bg: 'bg-purple-100', text: 'text-purple-700', icon: TrendingUp }
+        return { bg: 'bg-purple-600', icon: TrendingUp }
       case 'High Dependency':
-        return { bg: 'bg-red-100', text: 'text-red-700', icon: AlertTriangle }
+        return { bg: 'bg-red-600', icon: AlertTriangle }
       default:
-        return { bg: 'bg-slate-100', text: 'text-slate-700', icon: Zap }
+        return { bg: 'bg-gray-500', icon: Zap }
     }
   }
 
@@ -22,36 +22,43 @@ export default function VibeScoreCard({ score, classification }) {
   const Icon = badge.icon
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-6">
-      <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-        <Zap className="w-5 h-5 text-yellow-500" />
-        Vibe Score Analysis
-      </h2>
-      
-      <div className="space-y-4">
-        <div className="text-center py-4">
-          <div className={`text-5xl font-bold rounded-xl p-4 inline-block ${getScoreColor(score)}`}>
-            {score || 'N/A'}
-          </div>
-          <p className="text-sm text-slate-500 mt-2">
-            Score = (duration × prompts) / (break_time + 1)
-          </p>
+    <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+      <h2 className="text-xl font-black mb-6 flex items-center gap-3">
+        <div className="w-10 h-10 bg-red-600 flex items-center justify-center">
+          <Zap className="w-6 h-6 text-white" />
         </div>
+        VIBE SCORE
+      </h2>
 
-        {classification && (
-          <div className={`flex items-center justify-center gap-2 p-3 rounded-lg ${badge.bg}`}>
-            <Icon className={`w-5 h-5 ${badge.text}`} />
-            <span className={`font-semibold ${badge.text}`}>{classification}</span>
-          </div>
-        )}
+      <div className="text-center py-4 mb-4">
+        <div className={`inline-block ${getScoreAccent(score)} text-white px-8 py-4 border-4 border-black`}>
+          <div className="text-5xl font-black">{score || 'N/A'}</div>
+        </div>
+      </div>
 
-        <div className="text-sm text-slate-600 space-y-2 pt-4 border-t">
-          <p><strong>Score Thresholds:</strong></p>
-          <ul className="list-disc list-inside space-y-1 text-slate-500">
-            <li>Normal: &lt; 100</li>
-            <li>Deep Flow: 100 - 499</li>
-            <li>High Dependency: ≥ 500</li>
-          </ul>
+      {classification && (
+        <div className={`flex items-center justify-center gap-3 ${badge.bg} text-white p-3 border-2 border-black mb-4`}>
+          <Icon className="w-5 h-5" />
+          <span className="font-black">{classification.toUpperCase()}</span>
+        </div>
+      )}
+
+      <div className="border-t-4 border-black pt-4 mt-4">
+        <p className="font-black text-sm text-gray-500 mb-3">THRESHOLDS</p>
+        <div className="space-y-2">
+          {[
+            { label: 'NORMAL', range: '< 100', color: 'bg-gray-500' },
+            { label: 'DEEP FLOW', range: '100 - 499', color: 'bg-purple-600' },
+            { label: 'HIGH DEP.', range: '>= 500', color: 'bg-red-600' },
+          ].map(t => (
+            <div key={t.label} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`w-4 h-4 ${t.color} border border-black`} />
+                <span className="font-bold text-sm">{t.label}</span>
+              </div>
+              <span className="font-bold text-sm text-gray-500">{t.range}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

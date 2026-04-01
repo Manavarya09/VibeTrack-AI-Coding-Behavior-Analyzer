@@ -12,58 +12,46 @@ export default function AnalyticsSummary() {
         setAnalytics(data)
         setLoading(false)
       })
-      .catch(err => {
-        console.error('Failed to fetch analytics:', err)
+      .catch(() => {
         setLoading(false)
       })
   }, [])
 
   if (loading) {
-    return <div className="animate-pulse h-32 bg-slate-200 rounded-xl"></div>
+    return (
+      <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+        <div className="h-32 bg-gray-100 border-2 border-black animate-pulse" />
+      </div>
+    )
   }
 
+  const stats = [
+    { icon: TrendingUp, label: 'TOTAL SESSIONS', value: analytics?.total_sessions || 0, accent: 'bg-black' },
+    { icon: Clock, label: 'AVG SESSION', value: `${analytics?.avg_session_length || 0}m`, accent: 'bg-red-600' },
+    { icon: Zap, label: 'LONGEST SESSION', value: `${analytics?.longest_session || 0}m`, accent: 'bg-black' },
+    { icon: Coffee, label: 'BREAK FREQ', value: `${((analytics?.break_frequency || 0) * 100).toFixed(0)}%`, accent: 'bg-red-600' },
+  ]
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-6">
-      <h2 className="text-lg font-semibold text-slate-800 mb-4">Analytics Summary</h2>
-      
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <TrendingUp className="w-5 h-5 text-blue-500" />
-            <span className="text-slate-600">Total Sessions</span>
-          </div>
-          <span className="font-semibold text-slate-800">{analytics?.total_sessions || 0}</span>
-        </div>
+    <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+      <h2 className="text-xl font-black mb-6">ANALYTICS SUMMARY</h2>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Clock className="w-5 h-5 text-green-500" />
-            <span className="text-slate-600">Avg Session Length</span>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        {stats.map((stat, i) => (
+          <div key={i} className="border-2 border-black p-3">
+            <div className={`w-8 h-8 ${stat.accent} flex items-center justify-center mb-2`}>
+              <stat.icon className="w-4 h-4 text-white" />
+            </div>
+            <div className="text-2xl font-black">{stat.value}</div>
+            <div className="text-xs font-bold text-gray-500">{stat.label}</div>
           </div>
-          <span className="font-semibold text-slate-800">{analytics?.avg_session_length || 0} min</span>
-        </div>
+        ))}
+      </div>
 
+      <div className="border-t-2 border-black pt-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Zap className="w-5 h-5 text-purple-500" />
-            <span className="text-slate-600">Longest Session</span>
-          </div>
-          <span className="font-semibold text-slate-800">{analytics?.longest_session || 0} min</span>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Coffee className="w-5 h-5 text-orange-500" />
-            <span className="text-slate-600">Break Frequency</span>
-          </div>
-          <span className="font-semibold text-slate-800">{((analytics?.break_frequency || 0) * 100).toFixed(0)}%</span>
-        </div>
-
-        <div className="pt-4 border-t">
-          <div className="flex items-center justify-between">
-            <span className="text-slate-600">Total Prompts</span>
-            <span className="font-semibold text-slate-800">{analytics?.total_prompts || 0}</span>
-          </div>
+          <span className="font-bold text-gray-500">TOTAL PROMPTS</span>
+          <span className="font-black text-xl">{analytics?.total_prompts || 0}</span>
         </div>
       </div>
     </div>

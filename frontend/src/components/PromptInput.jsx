@@ -34,33 +34,37 @@ export default function PromptInput({ sessionId, onPromptSent }) {
 
   if (!sessionId) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border p-6">
-        <p className="text-slate-500 text-sm">Start a session to log prompts.</p>
+      <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+        <div className="h-20 bg-gray-100 border-2 border-black flex items-center justify-center">
+          <p className="font-bold text-gray-400">START A SESSION TO LOG PROMPTS</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-6">
-      <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-        <MessageSquare className="w-5 h-5" />
-        Log AI Prompt
+    <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+      <h2 className="text-xl font-black mb-4 flex items-center gap-3">
+        <div className="w-10 h-10 bg-black flex items-center justify-center">
+          <MessageSquare className="w-6 h-6 text-white" />
+        </div>
+        LOG AI PROMPT
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Enter your prompt to AI assistant..."
-          className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+          className="w-full px-4 py-3 border-4 border-black font-bold focus:outline-none focus:border-red-600 transition-colors resize-none"
           rows={3}
         />
         <button
           type="submit"
           disabled={sending || !prompt.trim()}
-          className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 px-4 font-black border-4 border-black hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Send className="w-4 h-4" />
-          {sending ? 'Sending...' : 'Log Prompt'}
+          <Send className="w-5 h-5" />
+          {sending ? 'SENDING...' : 'LOG PROMPT'}
         </button>
       </form>
     </div>

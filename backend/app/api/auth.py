@@ -11,6 +11,7 @@ from app.auth import (
     get_password_hash,
     ACCESS_TOKEN_EXPIRE_MINUTES,
 )
+from app.dependencies import get_current_user
 
 router = APIRouter()
 
@@ -87,6 +88,3 @@ def get_me(
     db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     return current_user
-
-
-from app.dependencies import get_current_user

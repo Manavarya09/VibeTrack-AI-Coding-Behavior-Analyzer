@@ -127,7 +127,7 @@ class SessionBase(BaseModel):
 
 
 class SessionCreate(SessionBase):
-    metadata: Optional[Dict[str, Any]] = None
+    session_metadata: Optional[Dict[str, Any]] = None
 
 
 class SessionUpdate(BaseModel):
@@ -137,7 +137,7 @@ class SessionUpdate(BaseModel):
     vibe_score: Optional[float] = Field(None, ge=0)
     classification: Optional[Classification] = None
     is_active: Optional[bool] = None
-    metadata: Optional[Dict[str, Any]] = None
+    session_metadata: Optional[Dict[str, Any]] = None
 
 
 class SessionResponse(BaseModel):
@@ -164,7 +164,7 @@ class EventCreate(BaseModel):
     source: SessionSource
     content: Optional[str] = None
     duration_seconds: int = 0
-    metadata: Optional[Dict[str, Any]] = None
+    event_metadata: Optional[Dict[str, Any]] = None
 
 
 class EventResponse(BaseModel):
@@ -302,7 +302,7 @@ class Session(Base):
     is_active = Column(Boolean, default=True)
     source = Column(SQLEnum(SessionSource), default=SessionSource.WEB)
 
-    metadata = Column(JSON, default=dict)
+    session_metadata = Column(JSON, default=dict)
     tags = Column(JSON, default=list)
 
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -340,7 +340,7 @@ class Event(Base):
         DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, index=True
     )
 
-    metadata = Column(JSON, default=dict)
+    event_metadata = Column(JSON, default=dict)
 
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
@@ -1544,7 +1544,7 @@ app.include_router(sitemap.router)
 # System info
 from app.api import system
 
-app.include_router(system.router)
+app.include_router(system.router, prefix="/api", tags=["System"])
 
 # Run the application
 if __name__ == "__main__":
