@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Brain, TrendingUp, TrendingDown, Lightbulb, AlertCircle, Zap, ArrowLeft, Sparkles } from 'lucide-react'
+import { motion } from 'framer-motion'
+import Navbar from '../components/Navbar'
+import { fetchPatterns, predict, fetchRecommendations } from '../utils/api'
 
-export default function MLInsights() {
+export default function MLInsights({ user }) {
   const [patterns, setPatterns] = useState(null)
+  const [recommendations, setRecommendations] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Prediction state
   const [duration, setDuration] = useState(60)
   const [prompts, setPrompts] = useState(10)
   const [breaks, setBreaks] = useState(5)
@@ -13,276 +15,232 @@ export default function MLInsights() {
   const [predicting, setPredicting] = useState(false)
 
   useEffect(() => {
-    fetch('/api/ml/patterns?user_id=1')
-      .then(res => res.json())
-      .then(data => {
-        setPatterns(data)
-        setLoading(false)
-      })
-      .catch(() => {
-        setLoading(false)
-      })
-  }, [])
+    Promise.all([
+      fetchPatterns(user?.id).catch(() => null),
+      fetchRecommendations(user?.id).catch(() => []),
+    ]).then(([p, r]) => {
+      setPatterns(p)
+      setRecommendations(Array.isArray(r) ? r : [])
+      setLoading(false)
+    })
+  }, [user?.id])
 
   const handlePredict = async () => {
     setPredicting(true)
     try {
-      const res = await fetch(`/api/ml/predict?duration=${duration}&prompt_count=${prompts}&break_minutes=${breaks}`)
-      const data = await res.json()
+      const data = await predict(duration, prompts, breaks)
       setPrediction(data)
-    } catch (err) {
-      console.error('Prediction failed:', err)
-    } finally {
+    } catch {} finally {
       setPredicting(false)
     }
   }
 
-  const getPatternIcon = (type) => {
-    switch (type) {
-      case 'peak_performance': return TrendingUp
-      case 'dependency_increasing': return AlertCircle
-      case 'dependency_decreasing': return TrendingDown
-      case 'break_habits': return Brain
-      default: return Lightbulb
-    }
+  const classColor = {
+    'Normal': '#78716c',
+    'Deep Flow': '#7c3aed',
+    'High Dependency': '#dc2626',
   }
 
-  const getPatternAccent = (type) => {
-    switch (type) {
-      case 'peak_performance': return 'bg-black'
-      case 'dependency_increasing': return 'bg-red-600'
-      case 'dependency_decreasing': return 'bg-black'
-      case 'break_habits': return 'bg-red-600'
-      default: return 'bg-gray-500'
-    }
-  }
-
-  const getClassificationColor = (c) => {
-    if (c === 'Deep Flow') return 'bg-purple-600'
-    if (c === 'High Dependency') return 'bg-red-600'
-    return 'bg-gray-500'
+  const patternTypeLabel = {
+    peak_performance: 'Peak Performance',
+    dependency_increasing: 'Rising Dependency',
+    dependency_decreasing: 'Improving Independence',
+    break_habits: 'Break Patterns',
+    high_engagement: 'High Engagement',
   }
 
   return (
-    <div className="min-h-screen bg-white text-black font-sans">
-      {/* Nav */}
-      <nav className="border-b-4 border-black bg-white sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-black flex items-center justify-center">
-                <Zap className="w-8 h-8 text-white" />
-              </div>
-              <span className="text-2xl font-black tracking-tighter">VIBETRACK</span>
-            </div>
-            <div className="flex items-center gap-6">
-              <a href="/dashboard" className="font-bold hover:underline">DASHBOARD</a>
-              <a href="/insights" className="font-black text-red-600 border-b-4 border-red-600 pb-1">INSIGHTS</a>
-              <a href="/settings" className="font-bold hover:underline">SETTINGS</a>
-              <a href="/" className="font-bold hover:underline flex items-center gap-1">
-                <ArrowLeft className="w-4 h-4" /> HOME
-              </a>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen" style={{ background: 'var(--surface-1)' }}>
+      <Navbar user={user} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none mb-3">
-            ML <span className="text-red-600">INSIGHTS</span>
-          </h1>
-          <p className="text-lg font-bold text-gray-600">AI-POWERED PATTERN DETECTION & PREDICTIONS</p>
-        </div>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+          <h1 className="text-2xl font-bold text-stone-800 tracking-tight">ML Insights</h1>
+          <p className="text-sm text-stone-400 mt-0.5">AI-powered pattern detection and session prediction</p>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Patterns Section */}
-          <div className="lg:col-span-2">
-            <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-              <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-600 flex items-center justify-center">
-                  <Brain className="w-6 h-6 text-white" />
-                </div>
-                DETECTED PATTERNS
-              </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Patterns */}
+          <div className="lg:col-span-2 space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="card p-5"
+            >
+              <h3 className="text-sm font-semibold text-stone-600 mb-4">Detected patterns</h3>
 
               {loading ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {[1, 2, 3].map(i => (
-                    <div key={i} className="h-20 bg-gray-100 border-2 border-black animate-pulse" />
+                    <div key={i} className="inset h-16 animate-pulse" />
                   ))}
                 </div>
               ) : patterns?.patterns?.length > 0 ? (
-                <div className="space-y-4">
-                  {patterns.patterns.map((pattern, index) => {
-                    const Icon = getPatternIcon(pattern.type)
-                    const accent = getPatternAccent(pattern.type)
-
-                    return (
-                      <div key={index} className="border-2 border-black p-4 flex items-start gap-4 hover:bg-gray-50 transition-colors">
-                        <div className={`w-12 h-12 ${accent} flex items-center justify-center flex-shrink-0`}>
-                          <Icon className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-black uppercase">{pattern.title || pattern.type.replace(/_/g, ' ')}</h3>
-                          <p className="font-bold text-gray-600 mt-1">{pattern.description}</p>
-                          {pattern.confidence != null && (
-                            <div className="mt-2 flex items-center gap-2">
-                              <div className="h-3 flex-1 bg-gray-200 border border-black">
-                                <div className="h-full bg-black" style={{ width: `${pattern.confidence * 100}%` }} />
-                              </div>
-                              <span className="font-black text-sm">{(pattern.confidence * 100).toFixed(0)}%</span>
-                            </div>
-                          )}
-                        </div>
+                <div className="space-y-3">
+                  {patterns.patterns.map((p, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.15 + i * 0.08 }}
+                      className="flex items-start gap-3 p-3 rounded-lg border border-stone-100 hover:bg-stone-50/50 transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0" style={{
+                        background: p.type === 'peak_performance' ? '#b45309'
+                          : p.type === 'dependency_increasing' ? '#dc2626'
+                          : p.type === 'dependency_decreasing' ? '#16a34a'
+                          : '#6d28d9',
+                      }}>
+                        {p.type.charAt(0).toUpperCase()}
                       </div>
-                    )
-                  })}
-
-                  {/* Recommendations */}
-                  {patterns.recommendations?.length > 0 && (
-                    <div className="border-t-4 border-black pt-6 mt-6">
-                      <h3 className="font-black text-lg mb-4 flex items-center gap-2">
-                        <Lightbulb className="w-5 h-5" />
-                        RECOMMENDATIONS
-                      </h3>
-                      <div className="space-y-3">
-                        {patterns.recommendations.map((rec, index) => (
-                          <div key={index} className="flex items-center gap-3 p-3 bg-gray-100 border-2 border-black">
-                            <div className="w-8 h-8 bg-red-600 flex items-center justify-center flex-shrink-0">
-                              <span className="font-black text-white text-sm">{index + 1}</span>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold text-stone-700">
+                          {p.title || patternTypeLabel[p.type] || p.type}
+                        </div>
+                        <div className="text-xs text-stone-500 mt-0.5">{p.description}</div>
+                        {p.confidence != null && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className="gauge-track flex-1">
+                              <div className="gauge-fill" style={{
+                                width: `${p.confidence * 100}%`,
+                                background: '#b45309',
+                              }} />
                             </div>
-                            <span className="font-bold">{rec}</span>
+                            <span className="text-[10px] font-semibold text-stone-400 dial">{Math.round(p.confidence * 100)}%</span>
                           </div>
-                        ))}
+                        )}
                       </div>
-                    </div>
-                  )}
+                    </motion.div>
+                  ))}
                 </div>
               ) : (
-                <div className="h-48 bg-gray-100 border-2 border-black flex items-center justify-center">
-                  <div className="text-center">
-                    <Brain className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                    <p className="font-black text-gray-400">NOT ENOUGH DATA YET</p>
-                    <p className="font-bold text-sm text-gray-400 mt-1">KEEP TRACKING TO GET INSIGHTS</p>
-                  </div>
+                <div className="inset h-28 flex items-center justify-center">
+                  <p className="text-sm text-stone-400">Not enough data yet. Keep tracking to get insights.</p>
                 </div>
               )}
-            </div>
+            </motion.div>
+
+            {/* Recommendations */}
+            {(patterns?.recommendations?.length > 0 || recommendations.length > 0) && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="card p-5"
+              >
+                <h3 className="text-sm font-semibold text-stone-600 mb-4">Recommendations</h3>
+                <div className="space-y-2">
+                  {(patterns?.recommendations || []).concat(
+                    recommendations.map(r => typeof r === 'string' ? r : r.message)
+                  ).filter(Boolean).slice(0, 6).map((rec, i) => (
+                    <div key={i} className="flex items-start gap-3 py-2">
+                      <div className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0 mt-0.5" style={{
+                        background: 'linear-gradient(135deg, #d97706, #b45309)',
+                      }}>
+                        {i + 1}
+                      </div>
+                      <span className="text-sm text-stone-600">{rec}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
           </div>
 
-          {/* Predictor Sidebar */}
-          <div className="space-y-6">
-            <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-              <h2 className="text-xl font-black mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 bg-black flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-                PREDICTOR
-              </h2>
+          {/* Predictor */}
+          <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="card p-5"
+            >
+              <h3 className="text-sm font-semibold text-stone-600 mb-4">Session predictor</h3>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-black uppercase text-gray-500 mb-2">DURATION (MIN)</label>
-                  <input
-                    type="number"
-                    value={duration}
-                    onChange={(e) => setDuration(Number(e.target.value))}
-                    className="w-full px-4 py-3 border-4 border-black font-bold focus:outline-none focus:border-red-600 transition-colors"
-                  />
+                  <label className="block text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1">Duration (min)</label>
+                  <input type="number" value={duration} onChange={e => setDuration(+e.target.value)} className="input-field" />
                 </div>
                 <div>
-                  <label className="block text-sm font-black uppercase text-gray-500 mb-2">EXPECTED PROMPTS</label>
-                  <input
-                    type="number"
-                    value={prompts}
-                    onChange={(e) => setPrompts(Number(e.target.value))}
-                    className="w-full px-4 py-3 border-4 border-black font-bold focus:outline-none focus:border-red-600 transition-colors"
-                  />
+                  <label className="block text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1">Expected prompts</label>
+                  <input type="number" value={prompts} onChange={e => setPrompts(+e.target.value)} className="input-field" />
                 </div>
                 <div>
-                  <label className="block text-sm font-black uppercase text-gray-500 mb-2">BREAK TIME (MIN)</label>
-                  <input
-                    type="number"
-                    value={breaks}
-                    onChange={(e) => setBreaks(Number(e.target.value))}
-                    className="w-full px-4 py-3 border-4 border-black font-bold focus:outline-none focus:border-red-600 transition-colors"
-                  />
+                  <label className="block text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1">Break time (min)</label>
+                  <input type="number" value={breaks} onChange={e => setBreaks(+e.target.value)} className="input-field" />
                 </div>
-
                 <button
                   onClick={handlePredict}
                   disabled={predicting}
-                  className="w-full bg-black text-white py-3 px-4 font-black border-4 border-black hover:bg-red-600 transition-colors disabled:opacity-50"
+                  className="btn-primary w-full disabled:opacity-50"
                 >
-                  {predicting ? 'PREDICTING...' : 'PREDICT OUTCOME'}
+                  {predicting ? 'Predicting...' : 'Predict outcome'}
                 </button>
 
                 {prediction && (
-                  <div className="border-4 border-black p-4 mt-4">
-                    <p className="font-black text-sm text-gray-500 mb-2">PREDICTION</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`px-4 py-2 text-white font-black ${getClassificationColor(prediction.predicted_classification)}`}>
-                        {(prediction.predicted_classification || 'NORMAL').toUpperCase()}
-                      </div>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="inset p-4 mt-3"
+                  >
+                    <div className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-2">Prediction</div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded text-white" style={{
+                        background: classColor[prediction.predicted_classification] || '#78716c',
+                      }}>
+                        {(prediction.predicted_classification || 'Normal').toUpperCase()}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Zap className="w-5 h-5" />
-                      <span className="font-black text-2xl">{Math.round(prediction.predicted_score || 0)}</span>
-                      <span className="font-bold text-gray-500 text-sm">VIBE SCORE</span>
+                    <div className="text-2xl font-bold dial text-stone-800 mb-1">
+                      {Math.round(prediction.predicted_score || 0)}
                     </div>
-                    <div className="mt-3 h-3 bg-gray-200 border border-black">
-                      <div className="h-full bg-black" style={{ width: `${(prediction.confidence || 0) * 100}%` }} />
+                    <div className="text-xs text-stone-400 mb-2">Predicted vibe score</div>
+                    <div className="gauge-track mb-1">
+                      <div className="gauge-fill" style={{
+                        width: `${(prediction.confidence || 0) * 100}%`,
+                        background: '#b45309',
+                      }} />
                     </div>
-                    <p className="text-sm font-bold text-gray-500 mt-1">
-                      CONFIDENCE: {((prediction.confidence || 0) * 100).toFixed(0)}%
-                    </p>
-                  </div>
+                    <div className="text-[10px] text-stone-400 dial">
+                      Confidence: {Math.round((prediction.confidence || 0) * 100)}%
+                    </div>
+                  </motion.div>
                 )}
               </div>
-            </div>
+            </motion.div>
 
-            {/* Score Reference */}
-            <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-              <h3 className="font-black mb-4">SCORE REFERENCE</h3>
-              <div className="space-y-3">
+            {/* Score reference */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="card p-5"
+            >
+              <h3 className="text-sm font-semibold text-stone-600 mb-3">Score reference</h3>
+              <div className="space-y-2">
                 {[
-                  { label: 'NORMAL', range: '< 100', color: 'bg-gray-500' },
-                  { label: 'DEEP FLOW', range: '100 - 499', color: 'bg-purple-600' },
-                  { label: 'HIGH DEPENDENCY', range: '>= 500', color: 'bg-red-600' },
+                  { label: 'Normal', range: '< 100', color: '#78716c' },
+                  { label: 'Deep Flow', range: '100 - 499', color: '#7c3aed' },
+                  { label: 'High Dependency', range: '500+', color: '#dc2626' },
                 ].map(item => (
-                  <div key={item.label} className="flex items-center gap-3">
-                    <div className={`w-6 h-6 ${item.color} border-2 border-black`} />
-                    <div>
-                      <span className="font-black text-sm">{item.label}</span>
-                      <span className="font-bold text-gray-500 text-sm ml-2">{item.range}</span>
-                    </div>
+                  <div key={item.label} className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-sm" style={{ background: item.color }} />
+                    <span className="text-xs font-semibold text-stone-600">{item.label}</span>
+                    <span className="text-xs text-stone-400 font-mono ml-auto">{item.range}</span>
                   </div>
                 ))}
               </div>
-              <div className="mt-4 pt-4 border-t-4 border-black">
-                <div className="bg-black text-white p-3">
-                  <code className="font-mono font-bold text-xs">(Duration x Prompts) / (Breaks + 1)</code>
+              <div className="mt-3 pt-3 border-t border-stone-100">
+                <div className="inset px-3 py-2">
+                  <code className="text-[11px] font-mono text-stone-500">(Duration x Prompts) / (Breaks + 1)</code>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="bg-black text-white py-8 mt-16 border-t-4 border-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white flex items-center justify-center">
-              <Zap className="w-5 h-5 text-black" />
-            </div>
-            <span className="font-black">VIBETRACK</span>
-          </div>
-          <span className="font-bold text-gray-400">&copy; 2026 VibeTrack</span>
-        </div>
-      </footer>
     </div>
   )
 }

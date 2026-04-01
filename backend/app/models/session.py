@@ -16,4 +16,5 @@ class Session(Base):
     vibe_score = Column(Float, nullable=True)
     classification = Column(String, default="Normal")
     is_active = Column(Boolean, default=True)
+    source = Column(String, default="web")
     created_at = Column(DateTime, default=datetime.utcnow)

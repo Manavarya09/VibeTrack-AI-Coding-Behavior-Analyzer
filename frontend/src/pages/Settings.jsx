@@ -1,178 +1,180 @@
-import { useState } from 'react'
-import { Zap, User, Bell, Database, ArrowLeft, Save } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import Navbar from '../components/Navbar'
+import { logout } from '../utils/api'
 
-export default function SettingsPage() {
-  const [userSettings, setUserSettings] = useState({
-    username: 'Developer',
-    email: 'dev@example.com',
-    idleThreshold: 5,
-    autoEndSession: 30,
-    notifications: true
+export default function Settings({ user }) {
+  const [settings, setSettings] = useState(() => {
+    const stored = localStorage.getItem('vibetrack_settings')
+    return stored ? JSON.parse(stored) : {
+      username: user?.username || '',
+      email: user?.email || '',
+      idleThreshold: 5,
+      autoEndSession: 30,
+      notifications: true,
+      desktopTracking: false,
+    }
   })
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    if (user) {
+      setSettings(s => ({ ...s, username: user.username, email: user.email }))
+    }
+  }, [user])
 
   const handleSave = () => {
-    localStorage.setItem('vibetrack_settings', JSON.stringify(userSettings))
-    alert('Settings saved!')
+    localStorage.setItem('vibetrack_settings', JSON.stringify(settings))
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
   }
 
+  const Toggle = ({ value, onChange }) => (
+    <div
+      className={`toggle-track ${value ? 'active' : ''}`}
+      onClick={() => onChange(!value)}
+    >
+      <div className="toggle-knob" />
+    </div>
+  )
+
   return (
-    <div className="min-h-screen bg-white text-black font-sans">
-      {/* Nav */}
-      <nav className="border-b-4 border-black bg-white sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-black flex items-center justify-center">
-                <Zap className="w-8 h-8 text-white" />
-              </div>
-              <span className="text-2xl font-black tracking-tighter">VIBETRACK</span>
-            </div>
-            <div className="flex items-center gap-6">
-              <a href="/dashboard" className="font-bold hover:underline">DASHBOARD</a>
-              <a href="/insights" className="font-bold hover:underline">INSIGHTS</a>
-              <a href="/settings" className="font-black text-red-600 border-b-4 border-red-600 pb-1">SETTINGS</a>
-              <a href="/" className="font-bold hover:underline flex items-center gap-1">
-                <ArrowLeft className="w-4 h-4" /> HOME
-              </a>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen" style={{ background: 'var(--surface-1)' }}>
+      <Navbar user={user} />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none mb-3">
-            <span className="text-red-600">SETTINGS</span>
-          </h1>
-          <p className="text-lg font-bold text-gray-600">CONFIGURE YOUR TRACKING PREFERENCES</p>
-        </div>
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+          <h1 className="text-2xl font-bold text-stone-800 tracking-tight">Settings</h1>
+          <p className="text-sm text-stone-400 mt-0.5">Configure your tracking preferences</p>
+        </motion.div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Profile */}
-          <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-            <h2 className="text-xl font-black mb-6 flex items-center gap-3">
-              <div className="w-10 h-10 bg-black flex items-center justify-center">
-                <User className="w-6 h-6 text-white" />
-              </div>
-              PROFILE
-            </h2>
-            <div className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="card p-5"
+          >
+            <h3 className="text-sm font-semibold text-stone-600 mb-4">Profile</h3>
+            <div className="space-y-3">
               <div>
-                <label className="block text-sm font-black uppercase text-gray-500 mb-2">USERNAME</label>
+                <label className="block text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1">Username</label>
                 <input
                   type="text"
-                  value={userSettings.username}
-                  onChange={(e) => setUserSettings({...userSettings, username: e.target.value})}
-                  className="w-full px-4 py-3 border-4 border-black font-bold focus:outline-none focus:border-red-600 transition-colors"
+                  value={settings.username}
+                  onChange={e => setSettings({ ...settings, username: e.target.value })}
+                  className="input-field"
                 />
               </div>
               <div>
-                <label className="block text-sm font-black uppercase text-gray-500 mb-2">EMAIL</label>
+                <label className="block text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1">Email</label>
                 <input
                   type="email"
-                  value={userSettings.email}
-                  onChange={(e) => setUserSettings({...userSettings, email: e.target.value})}
-                  className="w-full px-4 py-3 border-4 border-black font-bold focus:outline-none focus:border-red-600 transition-colors"
+                  value={settings.email}
+                  onChange={e => setSettings({ ...settings, email: e.target.value })}
+                  className="input-field"
                 />
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Notifications */}
-          <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-            <h2 className="text-xl font-black mb-6 flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-600 flex items-center justify-center">
-                <Bell className="w-6 h-6 text-white" />
-              </div>
-              NOTIFICATIONS
-            </h2>
-            <label className="flex items-center gap-4 cursor-pointer">
-              <div
-                onClick={() => setUserSettings({...userSettings, notifications: !userSettings.notifications})}
-                className={`w-14 h-8 border-4 border-black flex items-center transition-colors cursor-pointer ${
-                  userSettings.notifications ? 'bg-black' : 'bg-gray-200'
-                }`}
-              >
-                <div className={`w-5 h-5 bg-white border-2 border-black transition-transform ${
-                  userSettings.notifications ? 'translate-x-6' : 'translate-x-0.5'
-                }`} />
-              </div>
-              <span className="font-bold">ENABLE NOTIFICATIONS</span>
-            </label>
-          </div>
-
-          {/* Session Settings */}
-          <div className="border-4 border-black p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-            <h2 className="text-xl font-black mb-6 flex items-center gap-3">
-              <div className="w-10 h-10 bg-black flex items-center justify-center">
-                <Database className="w-6 h-6 text-white" />
-              </div>
-              SESSION SETTINGS
-            </h2>
-            <div className="space-y-6">
+          {/* Session config */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="card p-5"
+          >
+            <h3 className="text-sm font-semibold text-stone-600 mb-4">Session tracking</h3>
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-black uppercase text-gray-500 mb-2">
-                  IDLE THRESHOLD (MINUTES)
-                </label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="range"
-                    min="1"
-                    max="30"
-                    value={userSettings.idleThreshold}
-                    onChange={(e) => setUserSettings({...userSettings, idleThreshold: parseInt(e.target.value)})}
-                    className="flex-1 accent-black"
-                  />
-                  <div className="w-16 h-12 border-4 border-black flex items-center justify-center font-black text-xl">
-                    {userSettings.idleThreshold}
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-stone-500">Idle threshold</label>
+                  <div className="inset px-2 py-0.5">
+                    <span className="text-xs font-bold dial text-stone-700">{settings.idleThreshold} min</span>
                   </div>
                 </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="30"
+                  value={settings.idleThreshold}
+                  onChange={e => setSettings({ ...settings, idleThreshold: +e.target.value })}
+                  className="w-full accent-amber-600"
+                />
               </div>
               <div>
-                <label className="block text-sm font-black uppercase text-gray-500 mb-2">
-                  AUTO-END INACTIVE SESSION (MINUTES)
-                </label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="range"
-                    min="5"
-                    max="120"
-                    value={userSettings.autoEndSession}
-                    onChange={(e) => setUserSettings({...userSettings, autoEndSession: parseInt(e.target.value)})}
-                    className="flex-1 accent-black"
-                  />
-                  <div className="w-16 h-12 border-4 border-black flex items-center justify-center font-black text-xl">
-                    {userSettings.autoEndSession}
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-stone-500">Auto-end inactive session</label>
+                  <div className="inset px-2 py-0.5">
+                    <span className="text-xs font-bold dial text-stone-700">{settings.autoEndSession} min</span>
                   </div>
                 </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="120"
+                  value={settings.autoEndSession}
+                  onChange={e => setSettings({ ...settings, autoEndSession: +e.target.value })}
+                  className="w-full accent-amber-600"
+                />
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Save Button */}
-          <button
-            onClick={handleSave}
-            className="w-full bg-black text-white py-4 px-6 text-xl font-black border-4 border-black hover:bg-red-600 transition-colors flex items-center justify-center gap-3 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[3px] hover:translate-y-[3px] active:shadow-none active:translate-x-[6px] active:translate-y-[6px]"
+          {/* Toggles */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="card p-5"
           >
-            <Save className="w-6 h-6" />
-            SAVE SETTINGS
-          </button>
+            <h3 className="text-sm font-semibold text-stone-600 mb-4">Preferences</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-stone-700">Notifications</div>
+                  <div className="text-xs text-stone-400">Get alerts for long sessions</div>
+                </div>
+                <Toggle value={settings.notifications} onChange={v => setSettings({ ...settings, notifications: v })} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-medium text-stone-700">Desktop tracking</div>
+                  <div className="text-xs text-stone-400">Auto-detect active window</div>
+                </div>
+                <Toggle value={settings.desktopTracking} onChange={v => setSettings({ ...settings, desktopTracking: v })} />
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Save */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <button onClick={handleSave} className="btn-primary w-full">
+              {saved ? 'Settings saved' : 'Save settings'}
+            </button>
+          </motion.div>
+
+          {/* Danger zone */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="card p-5 mt-6"
+            style={{ borderColor: '#fecaca' }}
+          >
+            <h3 className="text-sm font-semibold text-red-700 mb-3">Account</h3>
+            <button onClick={logout} className="btn-danger w-full">
+              Sign out
+            </button>
+          </motion.div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="bg-black text-white py-8 mt-16 border-t-4 border-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white flex items-center justify-center">
-              <Zap className="w-5 h-5 text-black" />
-            </div>
-            <span className="font-black">VIBETRACK</span>
-          </div>
-          <span className="font-bold text-gray-400">&copy; 2026 VibeTrack</span>
-        </div>
-      </footer>
     </div>
   )
 }

@@ -35,6 +35,7 @@ class SessionResponse(BaseModel):
     vibe_score: Optional[float]
     classification: str
     is_active: bool
+    source: Optional[str] = "web"
 
     class Config:
         from_attributes = True
@@ -43,7 +44,10 @@ class SessionResponse(BaseModel):
 @router.post("/session/start", response_model=SessionResponse)
 def start_session(session_data: SessionCreate, db: Session = Depends(get_db)):
     session = SessionModel(
-        user_id=session_data.user_id, start_time=datetime.utcnow(), is_active=True
+        user_id=session_data.user_id,
+        source=session_data.source or "web",
+        start_time=datetime.utcnow(),
+        is_active=True,
     )
     db.add(session)
     db.commit()

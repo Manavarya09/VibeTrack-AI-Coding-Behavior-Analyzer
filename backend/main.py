@@ -463,9 +463,17 @@ def get_db_context():
 
 
 def init_db():
-    """Initialize database tables"""
+    """Initialize database tables for both main.py models and app/ models"""
+    # Create tables for main.py models (used by services in main.py)
     Base.metadata.create_all(bind=engine)
-    logger.info("Database initialized successfully")
+    # Create tables for app/ models (used by API route handlers)
+    from app.database import Base as AppBase, engine as app_engine
+    # Import all models to register them with AppBase.metadata
+    import app.models.user  # noqa: F401
+    import app.models.session  # noqa: F401
+    import app.models.event  # noqa: F401
+    AppBase.metadata.create_all(bind=app_engine)
+    logger.info("Database initialized successfully (main + app tables)")
 
 
 # ============================================================================
