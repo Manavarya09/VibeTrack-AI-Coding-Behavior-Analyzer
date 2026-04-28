@@ -34,6 +34,9 @@ Cargo.lock
 .DS_Store
 Thumbs.db
 
+# Logs
+vibetrack.log
+
 # Environment
 .env.local
 .env.*.local
